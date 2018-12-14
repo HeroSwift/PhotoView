@@ -25,8 +25,16 @@ public class PhotoView: UIView {
     
     public var image: UIImage! {
         didSet {
+            
+            scrollView.minimumZoomScale = 1
+            scrollView.maximumZoomScale = 1
+            scrollView.zoomScale = 1
+            
             imageView.image = image
             imageView.frame.size = image.size
+            
+            setNeedsLayout()
+            
         }
     }
     
@@ -113,7 +121,7 @@ extension PhotoView {
         else {
             scale = min(widthScale, heightScale)
         }
-        
+
         scrollView.maximumZoomScale = scale < 1 ? 1 : 2 * scale
         scrollView.minimumZoomScale = scale
         scrollView.zoomScale = scale

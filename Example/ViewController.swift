@@ -20,12 +20,12 @@ class ViewController: UIViewController {
             NSLayoutConstraint(item: photoView, attribute: .left, relatedBy: .equal, toItem: view, attribute: .left, multiplier: 1, constant: 0),
         ])
         
-        photoView.scaleType = PhotoView.ScaleType.fillHeight
+//        photoView.scaleType = PhotoView.ScaleType.fillHeight
         
         photoView.image = UIImage(named: "image")
         
         photoView.onTap = {
-            print("tap")
+            photoView.image = UIImage(named: "image")
         }
         
         photoView.onLongPress = {
