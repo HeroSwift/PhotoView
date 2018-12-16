@@ -12,32 +12,22 @@ public class PhotoView: UIView {
     
     private lazy var scrollView: UIScrollView = {
         let view = UIScrollView()
+        view.alwaysBounceVertical = true
+        view.alwaysBounceHorizontal = true
+        view.showsVerticalScrollIndicator = false
+        view.showsHorizontalScrollIndicator = false
+        view.delegate = self
         addSubview(view)
         return view
     }()
     
-    private lazy var imageView: UIImageView = {
+    public lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.isUserInteractionEnabled = true
         scrollView.addSubview(view)
         return view
     }()
-    
-    public var image: UIImage! {
-        didSet {
-            
-            scrollView.minimumZoomScale = 1
-            scrollView.maximumZoomScale = 1
-            scrollView.zoomScale = 1
-            
-            imageView.image = image
-            imageView.frame.size = image.size
-            
-            setNeedsLayout()
-            
-        }
-    }
-    
+
     public var scaleType = ScaleType.fillWidth
     
     public var onTap: (() -> Void)?
@@ -58,13 +48,28 @@ public class PhotoView: UIView {
         updateZoomScale()
         updateImagePosition()
     }
+    
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if let image = imageView.image {
+            
+            scrollView.minimumZoomScale = 1
+            scrollView.maximumZoomScale = 1
+            scrollView.zoomScale = 1
+            
+            imageView.frame.size = image.size
+            
+            updateZoomScale()
+            updateImagePosition()
+            
+        }
+    }
 
 }
 
 extension PhotoView: UIScrollViewDelegate {
     
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
+        return imageView.image != nil ? imageView : nil
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -79,13 +84,7 @@ extension PhotoView {
         
         backgroundColor = .black
         
-        scrollView.alwaysBounceVertical = true
-        scrollView.alwaysBounceHorizontal = true
-        
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        
-        scrollView.delegate = self
+        imageView.addObserver(self, forKeyPath: "image", options: [.new, .old], context: nil)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapGesture))
         tap.numberOfTapsRequired = 1
@@ -105,9 +104,13 @@ extension PhotoView {
     
     private func updateZoomScale() {
         
-        let viewSize = bounds.size
-        let imageSize = image.size
+        let imageSize = imageView.bounds.size
+        guard imageSize.width > 0 && imageSize.height > 0 else {
+            return
+        }
         
+        let viewSize = bounds.size
+
         let widthScale = viewSize.width / imageSize.width
         let heightScale = viewSize.height / imageSize.height
         let scale: CGFloat
@@ -130,8 +133,12 @@ extension PhotoView {
     
     private func updateImagePosition() {
         
-        let viewSize = bounds.size
         let imageSize = imageView.frame.size
+        guard imageSize.width > 0 && imageSize.height > 0 else {
+            return
+        }
+        
+        let viewSize = bounds.size
         
         let x = max(viewSize.width, imageSize.width) / 2
         let y = max(viewSize.height, imageSize.height) / 2

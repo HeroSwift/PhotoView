@@ -22,10 +22,10 @@ class ViewController: UIViewController {
         
 //        photoView.scaleType = PhotoView.ScaleType.fillHeight
         
-        photoView.image = UIImage(named: "image")
+        photoView.imageView.image = UIImage(named: "image")
         
         photoView.onTap = {
-            photoView.image = UIImage(named: "image")
+            photoView.imageView.image = UIImage(named: "image")
         }
         
         photoView.onLongPress = {
