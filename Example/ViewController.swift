@@ -32,6 +32,10 @@ class ViewController: UIViewController {
             print("long press")
         }
         
+        photoView.onScaleChange = { scale in
+            print("onScaleChange \(scale)")
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {

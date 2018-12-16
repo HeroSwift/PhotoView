@@ -3,7 +3,7 @@ import UIKit
 
 // https://www.appcoda.com/uiscrollview-introduction/
 
-// imageView.bounds.size 和 image.size 是原始尺寸
+// image.size 是原始尺寸
 // imageView.frame.size 是缩放后的尺寸
 
 // 继承 UIView，而不是 UIScrollView
@@ -20,10 +20,11 @@ public class PhotoView: UIView {
         addSubview(view)
         return view
     }()
-    
+
     public lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.isUserInteractionEnabled = true
+        view.addObserver(self, forKeyPath: "image", options: [.new, .old], context: nil)
         scrollView.addSubview(view)
         return view
     }()
@@ -32,6 +33,7 @@ public class PhotoView: UIView {
     
     public var onTap: (() -> Void)?
     public var onLongPress: (() -> Void)?
+    public var onScaleChange: ((CGFloat) -> Void)?
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -41,26 +43,33 @@ public class PhotoView: UIView {
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    public func reset(image: UIImage? = nil) {
+        
+        scrollView.minimumZoomScale = 1
+        scrollView.maximumZoomScale = 1
+        scrollView.zoomScale = 1
+        
+        if let image = image {
+            imageView.frame.size = image.size
+        }
+        
+        updateZoomScale()
+        updateImagePosition()
+        
+        scrollView.contentOffset = CGPoint(x: 0, y: 0)
+        
+    }
 
     public override func layoutSubviews() {
         super.layoutSubviews()
         scrollView.frame = bounds
-        updateZoomScale()
-        updateImagePosition()
+        reset()
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let image = imageView.image {
-            
-            scrollView.minimumZoomScale = 1
-            scrollView.maximumZoomScale = 1
-            scrollView.zoomScale = 1
-            
-            imageView.frame.size = image.size
-            
-            updateZoomScale()
-            updateImagePosition()
-            
+            reset(image: image)
         }
     }
 
@@ -74,6 +83,7 @@ extension PhotoView: UIScrollViewDelegate {
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
         updateImagePosition()
+        onScaleChange?(scrollView.zoomScale / scrollView.minimumZoomScale)
     }
     
 }
@@ -83,8 +93,6 @@ extension PhotoView {
     private func setup() {
         
         backgroundColor = .black
-        
-        imageView.addObserver(self, forKeyPath: "image", options: [.new, .old], context: nil)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapGesture))
         tap.numberOfTapsRequired = 1
@@ -104,13 +112,13 @@ extension PhotoView {
     
     private func updateZoomScale() {
         
-        let imageSize = imageView.bounds.size
-        guard imageSize.width > 0 && imageSize.height > 0 else {
+        guard let image = imageView.image else {
             return
         }
-        
-        let viewSize = bounds.size
 
+        let viewSize = bounds.size
+        let imageSize = image.size
+        
         let widthScale = viewSize.width / imageSize.width
         let heightScale = viewSize.height / imageSize.height
         let scale: CGFloat
