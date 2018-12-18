@@ -34,7 +34,9 @@ public class PhotoView: UIView {
     public var onTap: (() -> Void)?
     public var onLongPress: (() -> Void)?
     public var onScaleChange: ((CGFloat) -> Void)?
-
+    public var onDragStart: (() -> Void)?
+    public var onDragEnd: (() -> Void)?
+    
     public override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -79,6 +81,14 @@ extension PhotoView: UIScrollViewDelegate {
     
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView.image != nil ? imageView : nil
+    }
+    
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        onDragStart?()
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        onDragEnd?()
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -133,7 +143,7 @@ extension PhotoView {
             scale = min(widthScale, heightScale)
         }
 
-        scrollView.maximumZoomScale = scale < 1 ? 1 : 2 * scale
+        scrollView.maximumZoomScale = 3 * scale < 1 ? 1 : (3 * scale)
         scrollView.minimumZoomScale = scale
         scrollView.zoomScale = scale
         
