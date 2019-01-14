@@ -40,6 +40,14 @@ public class PhotoView: UIView {
     public var onDragStart: (() -> Void)?
     public var onDragEnd: (() -> Void)?
     
+    private var angle: Double = 0
+    
+    private var isReversed: Bool {
+        get {
+            return angle.truncatingRemainder(dividingBy: Double.pi) != 0
+        }
+    }
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -65,6 +73,20 @@ public class PhotoView: UIView {
         
         scrollView.contentOffset = CGPoint(x: 0, y: 0)
         
+    }
+    
+    public func rotate() {
+        
+        let offset = Double.pi / 2
+
+        angle += offset
+        
+        if angle.truncatingRemainder(dividingBy: 2 * Double.pi) == 0 {
+            angle = 0
+        }
+
+        imageView.transform = imageView.transform.rotated(by: CGFloat(offset))
+
     }
 
     public override func layoutSubviews() {
@@ -133,8 +155,16 @@ extension PhotoView {
         let viewSize = bounds.size
         let imageSize = image.size
         
-        let widthScale = viewSize.width / imageSize.width
-        let heightScale = viewSize.height / imageSize.height
+        var imageWidth = imageSize.width
+        var imageHeight = imageSize.height
+        
+        if isReversed {
+            imageWidth = imageSize.height
+            imageHeight = imageSize.width
+        }
+        
+        let widthScale = viewSize.width / imageWidth
+        let heightScale = viewSize.height / imageHeight
         let scale: CGFloat
         
         if scaleType == .fillWidth {
