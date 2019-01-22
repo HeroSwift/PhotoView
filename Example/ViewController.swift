@@ -25,20 +25,12 @@ class ViewController: UIViewController {
         photoView.imageView.image = UIImage(named: "image")
         
         photoView.onTap = {
+
             
-            UIView.animate(withDuration: 0.5, animations: {
-                photoView.rotate()
-                
-            })
-//            photoView.imageView.image = UIImage(named: "image")
         }
         
         photoView.onLongPress = {
             print("long press")
-        }
-        
-        photoView.onScaleChange = { scale in
-            print("onScaleChange \(scale)")
         }
         
     }
