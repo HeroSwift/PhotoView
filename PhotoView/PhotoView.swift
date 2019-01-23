@@ -106,6 +106,12 @@ public class PhotoView: UIView {
             return imageView.frame.size
         }
     }
+    
+    public var imageOriginalSize: CGSize? {
+        get {
+            return imageView.image?.size
+        }
+    }
 
     public var onReset: (() -> Void)?
     
@@ -251,7 +257,7 @@ extension PhotoView {
     
     private func updateZoomScale() {
         
-        guard let image = imageView.image else {
+        guard let imageSize = imageOriginalSize else {
             return
         }
 
@@ -259,7 +265,6 @@ extension PhotoView {
         let viewWidth = bounds.size.width - contentInset.left - contentInset.right
         let viewHeight = bounds.size.height - contentInset.top - contentInset.bottom
         
-        let imageSize = image.size
         let imageWidth = imageSize.width
         let imageHeight = imageSize.height
         
