@@ -112,6 +112,10 @@ public class PhotoView: UIView {
             return imageView.image?.size
         }
     }
+    
+    public var calculateMaxScale: ((CGFloat) -> CGFloat) = { scale in
+        return 3 * scale < 1 ? 1 : (3 * scale)
+    }
 
     public var onReset: (() -> Void)?
     
@@ -285,7 +289,7 @@ extension PhotoView {
             zoomScale = min(widthScale, heightScale)
         }
 
-        maxScale = 3 * zoomScale < 1 ? 1 : (3 * zoomScale)
+        maxScale = calculateMaxScale(zoomScale)
         minScale = zoomScale
         scale = zoomScale
         
