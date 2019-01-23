@@ -342,6 +342,10 @@ extension PhotoView {
         
         // 距离谁比较远就去谁
         let zoomScale = (scale - minScale > maxScale - scale) ? minScale : maxScale
+        guard zoomScale != scale else {
+            return
+        }
+        
         let point = gesture.location(in: imageView)
 
         scrollView.zoom(to: getZoomRect(point: point, zoomScale: zoomScale), animated: true)
